@@ -231,6 +231,7 @@ def chatbot():
         print("API Error:", e)
         return jsonify({"reply": "Sorry, my AI brain is sleeping right now! Please check your internet connection or API key."}), 500
 if __name__ == '__main__':
-    app.run(debug=True)
+       # PORT setting for render (dynamic port)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
 
-    app.run(host='0.0.0.0', port=5000, debug=True)
