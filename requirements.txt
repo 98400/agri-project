@@ -5,8 +5,10 @@ flask-login
 gunicorn
 google-generativeai
 scikit-learn
+joblib
 pandas
 numpy
+
 
 
 
