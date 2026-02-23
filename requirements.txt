@@ -1,9 +1,11 @@
 flask
 flask-cors
 flask-sqlalchemy
+flask-login
 gunicorn
 google-generativeai
 scikit-learn
 pandas
 numpy
+
 
