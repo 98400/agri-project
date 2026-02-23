@@ -90,7 +90,7 @@ def home():
     return render_template('index.html', history=user_history)
 
 # --- Real IoT Sensor API ---
-# हा एक रिकामा डबा (Variable) आहे, ज्यात हार्डवेअरचा डेटा सेव्ह राहील
+# it is a empty block where all the  data of hardware will be saved
 latest_sensor_data = {
     "temperature": 0.0,
     "humidity": 0.0,
@@ -102,7 +102,7 @@ def handle_sensor_data():
     global latest_sensor_data
     
     if request.method == 'POST':
-        # १. ही स्टेप तुझा IoT डिव्हाईस वापरून डेटा सर्व्हरला देईल
+        # this step use your IOT device and send it to the server
         data = request.get_json()
         latest_sensor_data['temperature'] = data.get('temperature', 0)
         latest_sensor_data['humidity'] = data.get('humidity', 0)
@@ -111,7 +111,7 @@ def handle_sensor_data():
         return jsonify({"status": "success", "message": "Data saved in Flask!"}), 200
         
     elif request.method == 'GET':
-        # २. ही स्टेप तुझी वेबसाईट (Frontend) वापरून डेटा खेचून घेईल
+        # this step is use for fetch the data from our website (frontend)
         return jsonify(latest_sensor_data)
 # -----------------------------
 # ---------------------------------
@@ -232,4 +232,5 @@ def chatbot():
         return jsonify({"reply": "Sorry, my AI brain is sleeping right now! Please check your internet connection or API key."}), 500
 if __name__ == '__main__':
     app.run(debug=True)
+
     app.run(host='0.0.0.0', port=5000, debug=True)
