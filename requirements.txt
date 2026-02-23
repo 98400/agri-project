@@ -1,6 +1,7 @@
-Flask
-numpy
-pandas
-scikit-learn
-Werkzeug
+flask
+flask-cors
 gunicorn
+google-generativeai
+scikit-learn
+pandas
+numpy
