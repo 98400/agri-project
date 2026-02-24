@@ -249,26 +249,27 @@
             inputField.value = '';
             chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll
 
-            // 2. Fetch Reply from Flask
-            fetch('/chatbot', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: msg })
-            })
-            .then(res => res.json())
-            .then(data => {
-                setTimeout(() => {
-                    chatMessages.innerHTML += `<div style="background: #e0f2f1; color: #333; padding: 10px; border-radius: 10px; max-width: 80%; align-self: flex-start; font-size: 14px; border: 1px solid #b2dfdb;">${data.reply}</div>`;
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                }, 500); // Thoda delay (realistic watnyasathi)
-            });
-        }
-
-        // 'Enter' dabalyavar message send vhava
-        document.getElementById('chat-input').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') sendMessage();
+        // 2. Fetch Reply from Flask
+        fetch('/chatbot', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: msg }) // 'message' की पायथन कोडला मॅच होते
+        })
+        .then(res => res.json())
+        .then(data => {
+            setTimeout(() => {
+                // बॅकएंडकडून आलेले 'reply' इथे स्क्रीनवर दिसेल
+                let botReply = data.reply ? data.reply : "क्षमस्व, मला तुमचे म्हणणे समजले नाही.";
+                
+                chatMessages.innerHTML += `<div style="background: #e0f2f1; color: #333; padding: 10px; border-radius: 10px; max-width: 80%; align-self: flex-start; font-size: 14px; border: 1px solid #b2dfdb;">${botReply}</div>`;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 500); 
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            chatMessages.innerHTML += `<div style="background: #ffebee; color: #c62828; padding: 10px; border-radius: 10px; max-width: 80%; align-self: flex-start; font-size: 14px;">सर्व्हर एरर! कृपया API Key तपासा.</div>`;
         });
-        
+    }
         // Default hide the chat box on load
         document.addEventListener("DOMContentLoaded", () => {
             document.getElementById('chat-box').style.display = 'none';
@@ -300,19 +301,8 @@
             })
             .catch(error => alert("Error connecting to server!"));
         });
-        // -----------------------
-        
-setInterval(function() {
-    fetch('/get-data') // तुमच्या Render सर्व्हरकडून डेटा ओढण्यासाठी
-        .then(response => response.json())
-        .then(data => {
-            // खात्री करा की तुमच्या HTML मध्ये हे IDs (temp_val, humid_val, rain_val) आहेत
-            document.getElementById('temp_val').innerText = data.temperature + "°C";
-            document.getElementById('humid_val').innerText = data.humidity + "%";
-            document.getElementById('rain_val').innerText = data.rainfall + " mm";
-        })
-        .catch(err => console.log("IoT डेटाची वाट पाहत आहे..."));
-}, 3000); // दर ३ सेकंदांनी डेटा अपडेट होईल
+        // -----------------------------
+        // -----------------------------
     </script>
 </body>
 </html>
