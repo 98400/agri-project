@@ -9,7 +9,7 @@ from flask_login import UserMixin, LoginManager, login_user, login_required, log
 from werkzeug.security import generate_password_hash, check_password_hash
 import warnings
 from google import genai
-
+sensor_data = {"temperature": 0, "humidity": 0, "rainfall": 0}
 warnings.filterwarnings("ignore")
 
 app = Flask(__name__)
@@ -230,10 +230,23 @@ def chatbot():
     except Exception as e:
         print("API Error:", e)
         return jsonify({"reply": "Sorry, my AI brain is sleeping right now! Please check your internet connection or API key."}), 500
+         @app.route('/update-sensor', methods=['POST'])
+    def update_sensor():
+       global sensor_data
+    # ESP32 कडून येणारा JSON डेटा इथे स्वीकारला जातो
+    sensor_data = request.get_json() 
+    print(f"Received Data: {sensor_data}") # हा फक्त चेक करण्यासाठी आहे
+    return {"message": "Data received successfully"}, 200
+
+    @app.route('/get-data', methods=['GET'])
+    def get_data():
+    # हा डेटा तुमचं मोबाईल ॲप दर ३ सेकंदांनी वाचेल
+       return jsonify(sensor_data)
 if __name__ == '__main__':
        # PORT setting for render (dynamic port)
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
+
 
 
 
