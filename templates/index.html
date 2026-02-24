@@ -300,8 +300,19 @@
             })
             .catch(error => alert("Error connecting to server!"));
         });
-        // -----------------------------
-        // -----------------------------
+        // -----------------------
+        
+setInterval(function() {
+    fetch('/get-data') // तुमच्या Render सर्व्हरकडून डेटा ओढण्यासाठी
+        .then(response => response.json())
+        .then(data => {
+            // खात्री करा की तुमच्या HTML मध्ये हे IDs (temp_val, humid_val, rain_val) आहेत
+            document.getElementById('temp_val').innerText = data.temperature + "°C";
+            document.getElementById('humid_val').innerText = data.humidity + "%";
+            document.getElementById('rain_val').innerText = data.rainfall + " mm";
+        })
+        .catch(err => console.log("IoT डेटाची वाट पाहत आहे..."));
+}, 3000); // दर ३ सेकंदांनी डेटा अपडेट होईल
     </script>
 </body>
 </html>
