@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Precision Farming - ML</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        * { box-sizing: border-box; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
+        body { background-color: #f4f7f6; transition: background 0.3s, color 0.3s; display: flex; flex-direction: column; min-height: 100vh; }
+        
+        body.dark { background-color: #121212; color: #ffffff; }
+        body.dark .container, body.dark .history-box { background-color: #1e1e1e; color: #ffffff; box-shadow: 0 4px 15px rgba(255,255,255,0.05); }
+        body.dark input { background-color: #333; color: #fff; border: 1px solid #555; }
+        body.dark .navbar { background: linear-gradient(135deg, #1e3c12 0%, #152b0d 100%); }
+        body.dark .footer { background: #1a1a1a; }
+        
+        /* Navbar */
+        .navbar { background: linear-gradient(135deg, #a8e063 0%, #56ab2f 100%); padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; }
+        .nav-title { font-size: 24px; font-weight: 600; }
+        .nav-right { display: flex; align-items: center; gap: 20px; }
+        .toggle-btn { background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(255,255,255,0.5); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .toggle-btn:hover { background: rgba(0,0,0,0.4); }
+        .logout-btn { background: white; color: #56ab2f; padding: 8px 18px; text-decoration: none; border-radius: 20px; font-weight: bold; font-size: 14px; }
+
+        .main-content { flex: 1; padding: 40px 20px; }
+        .container { max-width: 850px; margin: 0 auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; }
+        .container h2 { margin-bottom: 10px; color: #2c3e50; }
+        body.dark .container h2 { color: #a8e063; }
+        
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin: 30px 0; }
+        input { width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 15px; outline: none; }
+        input:focus { border-color: #56ab2f; }
+        
+        .btn-predict { background: #56ab2f; color: white; border: none; padding: 16px 40px; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; max-width: 300px; }
+        .btn-predict:hover { background: #448a25; transform: translateY(-3px); }
+        
+        .result-box { display: none; margin-top: 40px; padding: 30px; background: rgba(86,171,47,0.05); border-radius: 15px; border: 2px dashed #56ab2f; }
+        .crop-name { font-size: 28px; font-weight: bold; color: #56ab2f; text-transform: uppercase; letter-spacing: 2px; }
+        
+        .metrics { margin-top: 30px; text-align: left; }
+        .metric-row { margin-bottom: 15px; font-weight: 600; }
+        .bar-bg { width: 100%; background: #e0e0e0; border-radius: 10px; height: 12px; margin-top: 8px; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, #a8e063, #56ab2f); width: 0%; transition: width 1.5s ease-in-out; border-radius: 10px; }
+        
+        .history-box { max-width: 850px; margin: 40px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); text-align: left; }
+        .history-list { list-style: none; padding: 0; margin-top: 20px; }
+        .history-list li { background: #f8f9fa; margin-bottom: 12px; padding: 15px 20px; border-left: 6px solid #56ab2f; border-radius: 8px; font-weight: 500; display: flex; justify-content: space-between; }
+        body.dark .history-list li { background: #2a2a2a; border-left: 6px solid #a8e063; }
+
+        .footer { background: #2c3e50; color: #ecf0f1; text-align: center; padding: 20px; margin-top: auto; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-title">🌱 Precision Farming </div>
+        <div class="nav-right">
+            <button id="themeBtn" class="toggle-btn">🌙 Dark Mode</button>
+            <span style="font-size: 15px;">Hello, <b>{{ current_user.username }}</b></span>
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="container">
+            <h2>Smart Crop Recommendation</h2>
+            <p style="color: #7f8c8d; margin-bottom: 20px;">Enter real-time environmental data to predict the most profitable crop.</p>
+
+            <div class="input-grid">
+                <input type="number" id="nitrogen" placeholder="Nitrogen (N) [0 - 140]" min="0" max="140" step="any" required>
+                <input type="number" id="phosphorus" placeholder="Phosphorus (P) [5 - 145]" min="5" max="145" step="any" required>
+                <input type="number" id="potassium" placeholder="Potassium (K) [5 - 205]" min="5" max="205" step="any" required>
+                <input type="number" id="temperature" placeholder="Temperature (°C) [0 - 50]" min="0" max="50" step="any" required>
+                <input type="number" id="humidity" placeholder="Humidity (%) [0 - 100]" min="0" max="100" step="any" required>
+                <input type="number" id="ph" placeholder="Soil pH Value [0 - 14]" min="0" max="14" step="any" required>
+                <input type="number" id="rainfall" placeholder="Rainfall (mm) [0 - 400]" min="0" max="400" step="any" required>
+            </div>
+            <button type="button" id="fetchSensorBtn" style="background-color: #0d6efd; color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 20px; width: 100%; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            📡 Fetch Live IoT Sensor Data
+            </button>
+            <button id="predictBtn" class="btn-predict">Predict Crop</button>
+
+            <div id="resultBox" class="result-box">
+                <h3 style="color: #7f8c8d; margin-bottom: 10px;">Best Crop to Plant:</h3>
+                <div id="cropName" class="crop-name">Processing...</div>
+                
+                <canvas id="radarChart" style="max-width: 500px; margin: 30px auto;"></canvas>
+
+                <div class="metrics" style="display: none;">
+                    <div class="metric-row"><span>Accuracy: <b id="accText">0%</b></span><div class="bar-bg"><div class="bar-fill" id="accBar"></div></div></div>
+                    <div class="metric-row"><span>Precision: <b id="preText">0%</b></span><div class="bar-bg"><div class="bar-fill" id="preBar"></div></div></div>
+                    <div class="metric-row"><span>Recall: <b id="recText">0%</b></span><div class="bar-bg"><div class="bar-fill" id="recBar"></div></div></div>
+                    <div class="metric-row"><span>F1 Score: <b id="f1Text">0%</b></span><div class="bar-bg"><div class="bar-fill" id="f1Bar"></div></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #56ab2f; padding-bottom: 15px; margin-bottom: 20px;">
+                <h3 style="color: #2c3e50; margin: 0;">🕒 Your Recent Predictions</h3>
+                <button onclick="clearHistory()" style="background: #e74c3c; color: white; border: none; padding: 6px 15px; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold;">🗑️ Clear All</button>
+            </div>
+            <ul class="history-list">
+                {% for item in history %}
+                    <li><span>Predicted Crop: <strong style="color: #56ab2f; text-transform: uppercase;">{{ item.crop }}</strong></span> <span style="font-size: 12px; color: #95a5a6;">Saved</span></li>
+                {% else %}
+                    <li style="color: #7f8c8d; font-style: italic; background: transparent; border: none;">No prediction history found.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 Precision Farming Project. All rights reserved.</p>
+        <div id="chat-widget" style="position: fixed; bottom: 20px; right: 20px; z-index: 999; font-family: 'Poppins', sans-serif;">
+        <div id="chat-box" style="display: none; width: 320px; height: 400px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; border: 2px solid #56ab2f; margin-bottom: 10px;">
+            <div style="background: linear-gradient(135deg, #a8e063 0%, #56ab2f 100%); color: white; padding: 15px; font-weight: bold; text-align: center;">
+                🤖 Agri-Bot Assistant
+                <button onclick="toggleChat()" style="float: right; background: none; border: none; color: white; cursor: pointer; font-size: 16px;">✖</button>
+            </div>
+            <div id="chat-messages" style="flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px;">
+                <div style="background: #e0f2f1; padding: 10px; border-radius: 10px; max-width: 80%; align-self: flex-start; font-size: 14px;">Hi there! 🌱 How can I help your farm today?</div>
+            </div>
+            <div style="display: flex; border-top: 1px solid #ccc;">
+                <input type="text" id="chat-input" placeholder="Ask about farming..." style="flex: 1; padding: 12px; border: none; outline: none; border-radius: 0;">
+                <button onclick="sendMessage()" style="background: #56ab2f; color: white; border: none; padding: 0 20px; cursor: pointer; font-weight: bold;">Send</button>
+            </div>
+        </div>
+        <button id="chat-btn" onclick="toggleChat()" style="background: #56ab2f; color: white; border: none; width: 60px; height: 60px; border-radius: 50%; font-size: 24px; cursor: pointer; box-shadow: 0 5px 15px rgba(86,171,47,0.4); float: right; transition: 0.3s;">💬</button>
+    </div>
+    </footer>
+
+    <script>
+        let radar;
+
+        function toggleMode() {
+            document.body.classList.toggle("dark");
+            const btn = document.getElementById("themeBtn");
+            btn.innerHTML = document.body.classList.contains("dark") ? "☀️ Light Mode" : "🌙 Dark Mode";
+        }
+
+        function showResult() {
+            const inputs = ['nitrogen', 'phosphorus', 'potassium', 'temperature', 'humidity', 'ph', 'rainfall'];
+            for (let id of inputs) {
+            let el = document.getElementById(id);
+            if (!el.checkValidity()) {
+            el.reportValidity(); 
+            return; 
+         }
+        }
+            const n = document.getElementById("nitrogen").value;
+            const p = document.getElementById("phosphorus").value;
+            const k = document.getElementById("potassium").value;
+            const temp = document.getElementById("temperature").value;
+            const hum = document.getElementById("humidity").value;
+            const ph = document.getElementById("ph").value;
+            const rain = document.getElementById("rainfall").value;
+
+            if(!n || !p || !k || !temp || !hum || !ph || !rain) {
+                alert("Please fill in all the details!");
+                return;
+            }
+
+            document.getElementById("resultBox").style.display = "block";
+            document.getElementById("cropName").innerText = "ANALYZING...";
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nitrogen: n, phosphorus: p, potassium: k, temperature: temp, humidity: hum, ph: ph, rainfall: rain })
+            })
+            .then(res => res.json())
+            .then(resData => {
+                if(resData.crop) {
+                    document.getElementById("cropName").innerText = resData.crop;
+                    drawChart([n, p, k, temp, hum, ph, rain]);
+                    updateBars(resData.accuracy, resData.precision, resData.recall, resData.f1);
+                } else {
+                    document.getElementById("cropName").innerText = "Error";
+                }
+            });
+        }
+
+        function drawChart(vals) {
+            const ideal = [90, 45, 50, 25, 70, 6.5, 200];
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            if(radar) radar.destroy();
+            radar = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['N', 'P', 'K', 'Temp', 'Humidity', 'pH', 'Rain'],
+                    datasets: [
+                        { label: 'Your Soil', data: vals, backgroundColor: 'rgba(76,175,80,0.4)', borderColor: '#4caf50', borderWidth: 2 },
+                        { label: 'Ideal Soil', data: ideal, backgroundColor: 'rgba(33,150,243,0.2)', borderColor: '#2196f3', borderDash: [5,5], borderWidth: 2 }
+                    ]
+                },
+                options: { responsive: true }
+            });
+        }
+
+        function updateBars(acc, pre, rec, f1) {
+            setTimeout(() => {
+                document.getElementById("accBar").style.width = acc + "%"; document.getElementById("accText").innerText = acc + "%";
+                document.getElementById("preBar").style.width = pre + "%"; document.getElementById("preText").innerText = pre + "%";
+                document.getElementById("recBar").style.width = rec + "%"; document.getElementById("recText").innerText = rec + "%";
+                document.getElementById("f1Bar").style.width = f1 + "%"; document.getElementById("f1Text").innerText = f1 + "%";
+            }, 300);
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("themeBtn").addEventListener("click", toggleMode);
+            document.getElementById("predictBtn").addEventListener("click", showResult);
+        });
+        function clearHistory() {
+            if(confirm("Are you sure you want to delete all your prediction history?")) {
+                fetch('/clear_history', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === "success") {
+                        window.location.reload(); 
+                    } else {
+                        alert("Error clearing history!");
+                    }
+                });
+            }
+        }
+        // Chatbot Logic
+        function toggleChat() {
+            const chatBox = document.getElementById('chat-box');
+            chatBox.style.display = chatBox.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        function sendMessage() {
+            const inputField = document.getElementById('chat-input');
+            const msg = inputField.value.trim();
+            if (!msg) return;
+
+            const chatMessages = document.getElementById('chat-messages');
+            
+            // 1. Show User Message
+            chatMessages.innerHTML += `<div style="background: #56ab2f; color: white; padding: 10px; border-radius: 10px; max-width: 80%; align-self: flex-end; font-size: 14px;">${msg}</div>`;
+            inputField.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll
+
+            // 2. Fetch Reply from Flask
+            fetch('/chatbot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg })
+            })
+            .then(res => res.json())
+            .then(data => {
+                setTimeout(() => {
+                    chatMessages.innerHTML += `<div style="background: #e0f2f1; color: #333; padding: 10px; border-radius: 10px; max-width: 80%; align-self: flex-start; font-size: 14px; border: 1px solid #b2dfdb;">${data.reply}</div>`;
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 500); // Thoda delay (realistic watnyasathi)
+            });
+        }
+
+        // 'Enter' dabalyavar message send vhava
+        document.getElementById('chat-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') sendMessage();
+        });
+        
+        // Default hide the chat box on load
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById('chat-box').style.display = 'none';
+        });
+
+        // --- Fetch REAL IoT Data Logic ---
+        document.getElementById("fetchSensorBtn").addEventListener("click", function() {
+            let btn = this;
+            btn.innerText = "⏳ Fetching Real Data from Hardware...";
+            btn.style.backgroundColor = "#ffc107"; 
+            btn.style.color = "black";
+
+            fetch('/api/sensor-data')
+            .then(response => response.json())
+            .then(data => {
+                // only 3 inputes will get from sensors
+                document.getElementById('temperature').value = data.temperature;
+                document.getElementById('humidity').value = data.humidity;
+                document.getElementById('rainfall').value = data.rainfall;
+
+                btn.innerText = "✅ Real Sensor Data Fetched!";
+                btn.style.backgroundColor = "#198754"; 
+                btn.style.color = "white";
+                
+                setTimeout(() => { 
+                    btn.innerText = "📡 Fetch Live IoT Sensor Data"; 
+                    btn.style.backgroundColor = "#0d6efd";
+                }, 3000);
+            })
+            .catch(error => alert("Error connecting to server!"));
+        });
+        // -----------------------------
+        // -----------------------------
+    </script>
+</body>
+</html>
