@@ -3,11 +3,12 @@ flask-cors
 flask-sqlalchemy
 flask-login
 gunicorn
-google-generativeai
+google-genai
 scikit-learn
 joblib
 pandas
 numpy
+
 
 
 
