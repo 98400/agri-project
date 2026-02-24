@@ -231,16 +231,16 @@ def chatbot():
     except Exception as e:
         print("API Error:", e)
         return jsonify({"reply": "Sorry, my AI brain is sleeping right now! Please check your internet connection or API key."}), 500
-    @app.route('/update-sensor', methods=['POST'])
-    def update_sensor():
-       global sensor_data
+@app.route('/update-sensor', methods=['POST'])
+def update_sensor():
+    global sensor_data
     # ESP32 कडून येणारा JSON डेटा इथे स्वीकारला जातो
     sensor_data = request.get_json() 
     print(f"Received Data: {sensor_data}") # हा फक्त चेक करण्यासाठी आहे
     return {"message": "Data received successfully"}, 200
 
-    @app.route('/get-data', methods=['GET'])
-    def get_data():
+@app.route('/get-data', methods=['GET'])
+def get_data():
     # हा डेटा तुमचं मोबाईल ॲप दर ३ सेकंदांनी वाचेल
        return jsonify(sensor_data)
 
