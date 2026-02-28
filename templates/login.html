@@ -7,75 +7,62 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-       /* Login Page Attractive Theme */
-body {
-    background-image: url('https://image.pollinations.ai/prompt/Agri-Bot%20AI%20robot%20working%20in%20a%20modern%20farm%20with%20data%20overlays%20natural%20lighting%20photorealistic'); /* पहिली इमेज वापरा */
-    background-size: cover;
-    background-position: center;
-    font-family: 'Poppins', sans-serif; /* आधुनिक फॉन्ट */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-}
-
-.login-container {
-    background: rgba(255, 255, 255, 0.9); /* पारदर्शक पांढरा बॅकग्राउंड */
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* भारी शॅडो */
-    width: 350px;
-    text-align: center;
-}
-
-.login-container h2 {
-    color: #2e7d32; /* शेतीशी संबंधित हिरवा रंग */
-    margin-bottom: 30px;
-    font-weight: 600;
-}
-
-.form-group {
-    margin-bottom: 20px;
-    text-align: left;
-}
-
-.form-group label {
-    display: block;
-    color: #555;
-    margin-bottom: 5px;
-}
-
-.form-control {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-sizing: border-box;
-}
-
-.btn-login {
-    background-color: #2e7d32; /* हिरवे बटण */
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    width: 100%;
-    transition: background-color 0.3s;
-}
-
-.btn-login:hover {
-    background-color: #1b5e20; /* डार्क हिरवा होव्हर इफेक्ट */
-}
-
-.signup-link {
-    margin-top: 20px;
-    display: block;
-    color: #555;
-    text-decoration: none;
-}
+     body { 
+            margin: 0; 
+            padding: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            /* Beautiful Green Gradient Background */
+            background: linear-gradient(135deg, #a8e063 0%, #56ab2f 100%); 
+        }
+        .container { 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 40px 30px; 
+            border-radius: 15px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2); 
+            width: 100%; 
+            max-width: 400px; 
+            text-align: center; 
+        }
+        h2 { margin-bottom: 20px; color: #2c3e50; font-weight: 600; }
+        input { 
+            width: 100%; 
+            padding: 14px 15px; 
+            margin: 10px 0; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            outline: none; 
+            font-size: 15px; 
+            transition: 0.3s;
+        }
+        input:focus { 
+            border-color: #56ab2f; 
+            box-shadow: 0 0 8px rgba(86, 171, 47, 0.4); 
+        }
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            background: #56ab2f; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            margin-top: 15px; 
+            transition: all 0.3s ease;
+        }
+        button:hover { 
+            background: #448a25; 
+            transform: translateY(-2px); 
+            box-shadow: 0 5px 15px rgba(68, 138, 37, 0.4);
+        }
+        p { margin-top: 20px; font-size: 14px; color: #555; }
+        a { color: #56ab2f; text-decoration: none; font-weight: 600; }
+        a:hover { text-decoration: underline; }
+        .error { color: #e74c3c; font-size: 14px; margin-bottom: 10px; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -96,3 +83,4 @@ body {
 </body>
 
 </html>
+
