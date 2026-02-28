@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import warnings
-from google import genai
+import google.generativeai as genai
 
 sensor_data = {"temperature": 0, "humidity": 0, "rainfall": 0}
 warnings.filterwarnings("ignore")
@@ -194,43 +194,34 @@ def add_security_headers(response):
 
 # 5. REAL AI Agri-Bot (Gemini API Integration)
 
-GEMINI_API_KEY = "genai.configure(api_key=os.environ.get('GEMINI_API_KEY'))"
-
-#Initialize the new GenAI Client
-client = genai.Client(api_key=GEMINI_API_KEY)
-
+# योग्य पद्धत: Environment Variable मधून की मिळवणे
+api_key = os.environ.get('GEMINI_API_KEY')
+genai.configure(api_key=api_key)
 @app.route('/chatbot', methods=['POST'])
 def chatbot():
     try:
         user_msg = request.json.get('message')
         
-        # System prompt to instruct the AI how to behave
-        # --- AI Chatbot Prompt (Strictly Marathi) ---
+        # मॉडेल डिफाइन करा (1.5-flash हे कायमस्वरूपी आणि जलद आहे)
+        model_ai = genai.GenerativeModel('gemini-1.5-flash')
+        
         prompt = f"""
-        You are 'Agri-Bot', a highly knowledgeable agricultural expert from India. 
-        Your job is to help farmers with their farming, crop diseases, fertilizers, and weather-related queries.
-        
-        CRITICAL RULE: You MUST answer the following question STRICTLY in the MARATHI language only. 
-        Use simple, easy-to-understand Marathi words that a local farmer can easily read and understand.
-        
-        Farmer's Question: {user_msg}
+        तुम्ही 'Agri-Bot' आहात, भारताचे कृषी तज्ञ. 
+        शेतकऱ्यांना पीक रोग, खते आणि हवामानाबद्दल माहिती द्या.
+        नियम: फक्त आणि फक्त मराठी भाषेत उत्तरे द्या. 
+        शेतकऱ्याचा प्रश्न: {user_msg}
         """
-        # ---------------------------------------------
-        # Send request to Gemini using the new API syntax
-        response = client.models.generate_content(
-            model='gemini-2.5-flash', # Using the latest and fastest model
-            contents=prompt
-        )
         
-        reply = response.text
-        # Remove bold formatting (**) for a cleaner UI display
-        reply = reply.replace("**", "") 
+        # रिस्पॉन्स जनरेट करण्याची योग्य पद्धत
+        response = model_ai.generate_content(prompt)
+        
+        reply = response.text.replace("**", "") # क्लीन टेक्स्टसाठी
         
         return jsonify({"reply": reply})
         
     except Exception as e:
-        print("API Error:", e)
-        return jsonify({"reply": "Sorry, my AI brain is sleeping right now! Please check your internet connection or API key."}), 500
+        print(f"API Error: {e}")
+        return jsonify({"reply": "क्षमस्व, सर्व्हर कनेक्ट होऊ शकला नाही. कृपया थोड्या वेळाने प्रयत्न करा."}), 500
 @app.route('/update-sensor', methods=['POST'])
 def update_sensor():
     global sensor_data
@@ -249,3 +240,4 @@ if __name__ == '__main__':
     # PORT setting for render (dynamic port)
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
+
